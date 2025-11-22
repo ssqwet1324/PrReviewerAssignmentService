@@ -327,7 +327,7 @@ func (uc *UseCase) selectNewReviewer(ctx context.Context, teamName string, exclu
 	}
 
 	if len(candidates) == 0 {
-		return "", fmt.Errorf("no active replacement candidate in team") // Используем правильную ошибку
+		return "", fmt.Errorf("no active replacement candidate in team")
 	}
 
 	return candidates[rand.Intn(len(candidates))], nil
