@@ -338,8 +338,6 @@ func (repo *Repository) GetTeamByUserID(ctx context.Context, userID string) (str
 func (repo *Repository) CheckTeam(ctx context.Context, teamName string) (bool, error) {
 	var exists int
 
-	//err := repo.DB.QueryRow(ctx, `SELECT 1 FROM users WHERE team_name=$1 LIMIT 1`, teamName).Scan(&exists)
-
 	err := repo.DB.QueryRow(ctx, `SELECT 1 FROM team WHERE team_name=$1 LIMIT 1`, teamName).Scan(&exists)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
