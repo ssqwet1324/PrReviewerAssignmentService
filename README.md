@@ -128,8 +128,8 @@ go run cmd/pr_reviewer_service/main.go
 
 | Эндпоинт                                    | Метод | Описание           | Средняя задержка | RPS      | Передача данных |
 | ------------------------------------------- | ----- | ------------------ | ---------------- | -------- | --------------- |
-| http://localhost:8080/team/add              | POST  | Добавление команды | 94.11ms          | 10000    | 1.94MB/s        |
-| http://localhost:8080/team/get              | GET   | Получение команды  | 149.76ms         | 10000    | 4.34MB/s        |
+| http://localhost:8080/team/add              | POST  | Добавление команды | 94.11ms          | 9899.67  | 1.94MB/s        |
+| http://localhost:8080/team/get              | GET   | Получение команды  | 149.76ms         | 9978.64  | 4.34MB/s        |
 
 ### Подробные результаты
 
@@ -182,8 +182,8 @@ wrk.headers["Content-Type"] = "application/json"
 
 | Эндпоинт                                       | Метод | Описание                       | Средняя задержка | RPS     | Передача данных |
 | ---------------------------------------------- | ----- | ------------------------------ | ---------------- | ------- | --------------- |
-| http://localhost:8080/users/setIsActive        | POST  | Изменение статуса пользователя | 17.59s           | 10000   | 3184.37KB/s     |
-| http://localhost:8080/users/getReview          | GET   | Получение ревью пользователя   | 195.02ms         | 10000   | 1.50MB/s        |
+| http://localhost:8080/users/setIsActive        | POST  | Изменение статуса пользователя | 17.59s           | 1202.53 | 3184.37KB/s     |
+| http://localhost:8080/users/getReview          | GET   | Получение ревью пользователя   | 195.02ms         | 9814.01 | 1.50MB/s        |
 
 
 ### Подробные результаты
@@ -237,12 +237,93 @@ wrk.headers["Content-Type"] = "application/json"
 
 ---
 
+| Эндпоинт                                    | Метод | Описание                    | Средняя задержка | RPS     | Передача данных |
+| ------------------------------------------- | ----- | --------------------------- | ---------------- | ------- | --------------- |
+| http://localhost:8080/pullRequest/create    | POST  | Создание пул-реквеста       | 2.10ms           | 9900.06 | 1.81MB/s        |
+| http://localhost:8080/pullRequest/merge     | POST  | Мерж пул-реквеста           | 2.69s            | 9039.67 | 2.97MB          |
+| http://localhost:8080/pullRequest/reassign  | POST  | Переназначение пул-реквеста | 1.70s            | 9055.02 | 1.50MB/s        |
 
-## Проблемы с которыми столкнулся
 
-1. Проблема подключения Goose к pgxPool
-Проблема решилась тем, что нужно было создать pgx.ConnConfig и далее воспользоваться sql.DB.
+### Подробные результаты
 
-2. Проблема создания самописных ошибок.
-Я обычно обрабатывал ошибки через ctx.Json("тут http код ошибки", тут просто какая будет ошибка от кода)
-Тут чтобы решить проблему пришлось создавать собтвенные ошибки и сравнивать их с теми, которые приходят от бизнес логики.
+#### POST http://localhost:8080/pullRequest/create
+
+``` wrk2 -t4 -c100 -d30s -R10000 -s ./post_pr "http://localhost:8080/pullRequest/create"
+
+Running 30s test @ http://localhost:8080/pullRequest/create
+  4 threads and 100 connections
+  Thread calibration: mean lat.: 317.690ms, rate sampling interval: 2471ms
+  Thread calibration: mean lat.: 329.092ms, rate sampling interval: 2691ms
+  Thread calibration: mean lat.: 318.289ms, rate sampling interval: 2603ms
+  Thread calibration: mean lat.: 328.545ms, rate sampling interval: 2682ms
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     2.10ms    3.97ms  92.99ms   99.23%
+    Req/Sec     2.50k     2.12     2.51k    89.66%
+  297022 requests in 30.00s, 54.39MB read
+  Non-2xx or 3xx responses: 297021
+Requests/sec:   9900.06
+Transfer/sec:      1.81MB
+```
+
+#### POST http://localhost:8080/pullRequest/merge
+
+```   wrk2 -t4 -c100 -d30s -R10000 -s ./post_merge "http://localhost:8080/pullRequest/merge"
+
+Running 30s test @ http://localhost:8080/pullRequest/merge
+  4 threads and 100 connections
+  Thread calibration: mean lat.: 617.771ms, rate sampling interval: 4816ms
+  Thread calibration: mean lat.: 618.238ms, rate sampling interval: 4812ms
+  Thread calibration: mean lat.: 618.624ms, rate sampling interval: 4812ms
+  Thread calibration: mean lat.: 617.357ms, rate sampling interval: 4812ms
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     2.69s   133.90ms   2.98s    64.86%
+    Req/Sec     2.45k   101.68     2.55k    75.00%
+  271193 requests in 30.00s, 88.97MB read
+Requests/sec:   9039.67
+Transfer/sec:      2.97MB
+```
+
+#### POST http://localhost:8080/pullRequest/reassign
+
+```  wrk2 -t4 -c100 -d30s -R10000 -s ./post_reassing "http://localhost:8080/pullRequest/reassign"
+
+Running 30s test @ http://localhost:8080/pullRequest/reassign
+  4 threads and 100 connections
+  Thread calibration: mean lat.: 68.549ms, rate sampling interval: 335ms
+  Thread calibration: mean lat.: 66.970ms, rate sampling interval: 327ms
+  Thread calibration: mean lat.: 67.313ms, rate sampling interval: 329ms
+  Thread calibration: mean lat.: 75.266ms, rate sampling interval: 336ms
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     1.70s     1.08s    2.72s    67.63%
+    Req/Sec     2.40k   451.54     2.99k    95.83%
+  271657 requests in 30.00s, 58.29MB read
+  Non-2xx or 3xx responses: 271657
+Requests/sec:   9055.02
+Transfer/sec:      1.94MB
+```
+
+### Примеры скриптов для wrk
+
+#### post_pr.lua (POST)
+
+```
+wrk.method = "POST"
+wrk.body   = '{"pull_request_id":"pr-1005","pull_request_name":"Add search","author_id":"u1"}'
+wrk.headers["Content-Type"] = "application/json"
+```
+
+#### post_merge.lua (POST)
+
+```
+wrk.method = "POST"
+wrk.body   = '{"pull_request_id":"pr-1005"}'
+wrk.headers["Content-Type"] = "application/json"
+```
+
+#### post_reassing.lua (POST)
+
+```
+wrk.method = "POST"
+wrk.body   = '{"pull_request_id":"pr-1005","old_reviewer_id":"u2"}'
+wrk.headers["Content-Type"] = "application/json"
+```
