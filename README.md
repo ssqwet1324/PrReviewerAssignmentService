@@ -182,7 +182,7 @@ wrk.headers["Content-Type"] = "application/json"
 
 | Эндпоинт                                       | Метод | Описание                       | Средняя задержка | RPS     | Передача данных |
 | ---------------------------------------------- | ----- | ------------------------------ | ---------------- | ------- | --------------- |
-| http://localhost:8080/users/setIsActive        | POST  | Изменение статуса пользователя | 17.59s           | 1202.53 | 3184.37KB/s     |
+| http://localhost:8080/users/setIsActive        | POST  | Изменение статуса пользователя | 1.38ms           | 999.85  | 186.50KB/s      |
 | http://localhost:8080/users/getReview          | GET   | Получение ревью пользователя   | 195.02ms         | 9814.01 | 1.50MB/s        |
 
 
@@ -190,7 +190,7 @@ wrk.headers["Content-Type"] = "application/json"
 
 #### POST http://localhost:8080/users/setIsActive
 
-``` wrk2 -t4 -c100 -d30s -R10000 -s ./postChange "http://localhost:8080/users/setIsActive"
+``` wrk2 -t4 -c40 -d30s -R1000 -s ./postChange "http://localhost:8080/users/setIsActive"
 
   Running 30s test @ http://localhost:8080/users/setIsActive
   4 threads and 100 connections
@@ -239,30 +239,31 @@ wrk.headers["Content-Type"] = "application/json"
 
 | Эндпоинт                                    | Метод | Описание                    | Средняя задержка | RPS     | Передача данных |
 | ------------------------------------------- | ----- | --------------------------- | ---------------- | ------- | --------------- |
-| http://localhost:8080/pullRequest/create    | POST  | Создание пул-реквеста       | 2.10ms           | 9900.06 | 1.81MB/s        |
-| http://localhost:8080/pullRequest/merge     | POST  | Мерж пул-реквеста           | 2.69s            | 9039.67 | 2.97MB          |
-| http://localhost:8080/pullRequest/reassign  | POST  | Переназначение пул-реквеста | 1.70s            | 9055.02 | 1.50MB/s        |
+| http://localhost:8080/pullRequest/create    | POST  | Создание пул-реквеста       | 2.10ms           | 8259.83 | 1.50MB/s        |
+| http://localhost:8080/pullRequest/merge     | POST  | Мерж пул-реквеста           | 1.34ms           | 1299.51 | 242.39KB/s      |
+| http://localhost:8080/pullRequest/reassign  | POST  | Переназначение пул-реквеста | 2.55ms           | 6422.34 | 1.17MB/s        |
 
 
 ### Подробные результаты
 
 #### POST http://localhost:8080/pullRequest/create
 
-``` wrk2 -t4 -c100 -d30s -R10000 -s ./post_pr "http://localhost:8080/pullRequest/create"
+``` wrk2 -t4 -c40 -d30s -R9000 -s ./post_pr "http://localhost:8080/pullRequest/create"
 
 Running 30s test @ http://localhost:8080/pullRequest/create
-  4 threads and 100 connections
-  Thread calibration: mean lat.: 317.690ms, rate sampling interval: 2471ms
-  Thread calibration: mean lat.: 329.092ms, rate sampling interval: 2691ms
-  Thread calibration: mean lat.: 318.289ms, rate sampling interval: 2603ms
-  Thread calibration: mean lat.: 328.545ms, rate sampling interval: 2682ms
+  4 threads and 40 connections
+  Thread calibration: mean lat.: 2.206ms, rate sampling interval: 10ms
+  Thread calibration: mean lat.: 2.193ms, rate sampling interval: 10ms
+  Thread calibration: mean lat.: 2.206ms, rate sampling interval: 10ms
+  Thread calibration: mean lat.: 2.227ms, rate sampling interval: 10ms
   Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency     2.10ms    3.97ms  92.99ms   99.23%
-    Req/Sec     2.50k     2.12     2.51k    89.66%
-  297022 requests in 30.00s, 54.39MB read
-  Non-2xx or 3xx responses: 297021
-Requests/sec:   9900.06
-Transfer/sec:      1.81MB
+    Latency     4.68ms    8.52ms  79.81ms   94.41%
+    Req/Sec     2.38k   453.90     4.89k    79.93%
+  262600 requests in 31.79s, 47.83MB read
+  Socket errors: connect 0, read 0, write 0, timeout 39
+  Non-2xx or 3xx responses: 262600
+Requests/sec:   8259.83
+Transfer/sec:      1.50MB
 ```
 
 #### POST http://localhost:8080/pullRequest/merge
@@ -270,36 +271,39 @@ Transfer/sec:      1.81MB
 ```   wrk2 -t4 -c100 -d30s -R10000 -s ./post_merge "http://localhost:8080/pullRequest/merge"
 
 Running 30s test @ http://localhost:8080/pullRequest/merge
-  4 threads and 100 connections
-  Thread calibration: mean lat.: 617.771ms, rate sampling interval: 4816ms
-  Thread calibration: mean lat.: 618.238ms, rate sampling interval: 4812ms
-  Thread calibration: mean lat.: 618.624ms, rate sampling interval: 4812ms
-  Thread calibration: mean lat.: 617.357ms, rate sampling interval: 4812ms
+  4 threads and 40 connections
+  Thread calibration: mean lat.: 622.398ms, rate sampling interval: 4141ms
+  Thread calibration: mean lat.: 654.700ms, rate sampling interval: 4202ms
+  Thread calibration: mean lat.: 654.561ms, rate sampling interval: 4202ms
+  Thread calibration: mean lat.: 622.513ms, rate sampling interval: 4143ms
   Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency     2.69s   133.90ms   2.98s    64.86%
-    Req/Sec     2.45k   101.68     2.55k    75.00%
-  271193 requests in 30.00s, 88.97MB read
-Requests/sec:   9039.67
-Transfer/sec:      2.97MB
+    Latency     1.34ms  462.53us  10.46ms   68.91%
+    Req/Sec   324.44      0.50   325.00    100.00%
+  38989 requests in 30.00s, 7.10MB read
+  Socket errors: connect 0, read 0, write 0, timeout 40
+  Non-2xx or 3xx responses: 38989
+Requests/sec:   1299.51
+Transfer/sec:    242.39KB
 ```
 
 #### POST http://localhost:8080/pullRequest/reassign
 
-```  wrk2 -t4 -c100 -d30s -R10000 -s ./post_reassing "http://localhost:8080/pullRequest/reassign"
+```   wrk2 -t4 -c40 -d30s -R7000 -s ./post_reassing "http://localhost:8080/pullRequest/reassign"
 
 Running 30s test @ http://localhost:8080/pullRequest/reassign
-  4 threads and 100 connections
-  Thread calibration: mean lat.: 68.549ms, rate sampling interval: 335ms
-  Thread calibration: mean lat.: 66.970ms, rate sampling interval: 327ms
-  Thread calibration: mean lat.: 67.313ms, rate sampling interval: 329ms
-  Thread calibration: mean lat.: 75.266ms, rate sampling interval: 336ms
+  4 threads and 40 connections
+  Thread calibration: mean lat.: 1.736ms, rate sampling interval: 10ms
+  Thread calibration: mean lat.: 1.675ms, rate sampling interval: 10ms
+  Thread calibration: mean lat.: 1.746ms, rate sampling interval: 10ms
+  Thread calibration: mean lat.: 1.739ms, rate sampling interval: 10ms
   Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency     1.70s     1.08s    2.72s    67.63%
-    Req/Sec     2.40k   451.54     2.99k    95.83%
-  271657 requests in 30.00s, 58.29MB read
-  Non-2xx or 3xx responses: 271657
-Requests/sec:   9055.02
-Transfer/sec:      1.94MB
+    Latency     2.55ms    8.31ms 117.89ms   98.08%
+    Req/Sec     1.85k   298.96     6.67k    94.47%
+  204115 requests in 31.78s, 37.18MB read
+  Socket errors: connect 0, read 0, write 0, timeout 40
+  Non-2xx or 3xx responses: 204115
+Requests/sec:   6422.34
+Transfer/sec:      1.17MB
 ```
 
 ### Примеры скриптов для wrk
