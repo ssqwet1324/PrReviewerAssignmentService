@@ -27,7 +27,6 @@ docker-compose --version
 ### 3. Установите Make (опционально)
 
 - **Windows**: установите через [Chocolatey](https://chocolatey.org/) или используйте Git Bash
-- **Linux/Mac**: обычно уже установлен
 
 ## Сборка и запуск
 
