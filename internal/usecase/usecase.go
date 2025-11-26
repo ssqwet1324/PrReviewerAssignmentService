@@ -25,16 +25,26 @@ type RepositoryProvider interface {
 	CheckPR(ctx context.Context, prID string) (bool, error)
 }
 
+// UseCaseInterface - интерфейс для usecase
+type UseCaseInterface interface {
+	CreateTeam(ctx context.Context, team entity.Team) (*entity.Team, error)
+	GetTeam(ctx context.Context, teamName string) (*entity.Team, error)
+	ChangeActivityUser(ctx context.Context, user entity.User) (*entity.User, error)
+	GetReviewFromUser(ctx context.Context, userID string) ([]entity.PullRequestShort, error)
+	CreatePullRequest(ctx context.Context, pr entity.PullRequestShort) (*entity.PullRequest, error)
+	MergePr(ctx context.Context, prID string) (*entity.PullRequest, error)
+	ReassignPrReviewer(ctx context.Context, prID, oldReviewerID string) (*entity.PullRequest, string, error)
+}
+
 // UseCase - бизнес логика
 type UseCase struct {
 	repo RepositoryProvider
 }
 
 // New - конструктор бизнес логики
-func New(repo RepositoryProvider) *UseCase {
-	return &UseCase{
-		repo: repo,
-	}
+func New(repo RepositoryProvider) UseCaseInterface {
+	useCase := UseCase{repo: repo}
+	return NewObs(useCase)
 }
 
 // CreateTeam - создание команды
@@ -185,7 +195,7 @@ func (uc *UseCase) generateReviewers(ctx context.Context, teamName, authorID str
 		}
 	}
 
-	// если кандидатов нету возвращаем пустой список
+	// если кандидатов нет возвращаем пустой список
 	if len(candidates) == 0 {
 		return candidates, nil
 	}

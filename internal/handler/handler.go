@@ -11,11 +11,11 @@ import (
 
 // Handler - ручки
 type Handler struct {
-	uc *usecase.UseCase
+	uc usecase.UseCaseInterface
 }
 
 // New - конструктор handler
-func New(uc *usecase.UseCase) *Handler {
+func New(uc usecase.UseCaseInterface) *Handler {
 	return &Handler{
 		uc: uc,
 	}

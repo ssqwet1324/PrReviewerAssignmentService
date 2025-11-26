@@ -1,20 +1,23 @@
 package app
 
 import (
-	"log"
 	"pr_reviewer_service/internal/config"
 	"pr_reviewer_service/internal/handler"
+	"pr_reviewer_service/internal/middleware"
 	"pr_reviewer_service/internal/repository"
 	"pr_reviewer_service/internal/usecase"
 	"pr_reviewer_service/migrations"
 
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 )
 
 // Run - запуск сервера
 func Run() {
 	server := gin.Default()
+
+	server.Use(middleware.PrometheusMiddleware())
 
 	logger, err := zap.NewDevelopment()
 	if err != nil {
@@ -43,17 +46,26 @@ func Run() {
 
 	prHandler := handler.New(useCase)
 
-	server.POST("/team/add", prHandler.CreateTeam)
-	server.GET("/team/get", prHandler.GetTeam)
+	//Teams
+	teamGroup := server.Group("/team")
+	teamGroup.POST("/add", prHandler.CreateTeam)
+	teamGroup.GET("/get", prHandler.GetTeam)
 
-	server.POST("/users/setIsActive", prHandler.SetIsActive)
-	server.GET("/users/getReview", prHandler.GetReview)
+	//Users
+	usersGroup := server.Group("/users")
+	usersGroup.POST("/setIsActive", prHandler.SetIsActive)
+	usersGroup.GET("/getReview", prHandler.GetReview)
 
-	server.POST("/pullRequest/create", prHandler.PullRequestCreate)
-	server.POST("/pullRequest/merge", prHandler.MergePR)
-	server.POST("/pullRequest/reassign", prHandler.ReassignPrReviewer)
+	//Pull Request
+	prGroup := server.Group("/pullRequest")
+	prGroup.POST("/create", prHandler.PullRequestCreate)
+	prGroup.POST("/merge", prHandler.MergePR)
+	prGroup.POST("/reassign", prHandler.ReassignPrReviewer)
+
+	//Metrics
+	server.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	if err := server.Run(":8080"); err != nil {
-		log.Fatal(err)
+		logger.Fatal("error running server", zap.Error(err))
 	}
 }
